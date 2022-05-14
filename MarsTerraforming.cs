@@ -41,10 +41,10 @@
             ///{
             //    Log.WriteErrorLineLocStr(layer.Name + " : " + layer.GetValue(LayerPosition.FromWorldPosition(new Vector2i(200, 200), layer.Settings.VoxelsPerEntry)));
             //}
-            Vector2i marsLowerLeft = new Vector2i(0, 0);
-            Vector2i marsDimensions = new Vector2i(99, 99);
+            //Vector2i marsLowerLeft = new Vector2i(0, 0);
+            //Vector2i marsDimensions = new Vector2i(99, 99);
             
-            MarsTerraforming.Terraform(marsLowerLeft, marsDimensions);
+            //MarsTerraforming.Terraform(marsLowerLeft, marsDimensions);
             //MarsTerraforming.CollapseAllOverhangs(new Vector2i(470, 420), new Vector2i(470, 420) + new Vector2i(150, 150));
         }
     }
