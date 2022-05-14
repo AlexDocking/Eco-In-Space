@@ -30,3 +30,6 @@ Known issues:
 4. There are thin columns of gneiss, which when turned to water can lead to deep narrow holes into the ground. Solution may be to make gneiss above a certain height or too close to the surface into sandstone, and only turn deep gneiss depsosits to water
 5. No way yet of linking waste filter rooms to other nearby pressurised rooms that don't have their own waste filters. Currently every room needs a waste filter in order to breath without using the oxygen tank
 6. Waste filters don't add any load to the power grid
+
+
+Put the .cs files from the master branch in /UserCode
