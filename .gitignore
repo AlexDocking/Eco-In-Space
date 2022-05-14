@@ -1,0 +1,7 @@
+*.csproj
+Eco*
+TeleportPlugin.cs
+*.cache
+.vs*
+SkidSteerCaloriesPlugin.cs
+obj*

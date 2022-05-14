@@ -17,6 +17,8 @@
     using Eco.Gameplay.Plants;
     using Eco.Gameplay.Players;
     using Eco.Gameplay.Systems.Chat;
+    using Eco.Gameplay.Systems.Messaging.Chat;
+    using Eco.Gameplay.Systems.Messaging.Chat.Commands;
     using Eco.Mods.TechTree;
     using Eco.Shared.Localization;
     using Eco.Shared.Math;
@@ -24,6 +26,7 @@
     using Eco.Shared.Services;
     using Eco.Shared.Utils;
     using Eco.Simulation.Agents;
+    using Eco.Simulation.Types;
     using Eco.Simulation.WorldLayers;
     using Eco.Simulation.WorldLayers.Layers;
     using Eco.World;
@@ -35,10 +38,13 @@
         public void Initialize(TimedTask timer)
         {
             //foreach(WorldLayer layer in WorldLayerManager.Obj.Layers)
-            //{
+            ///{
             //    Log.WriteErrorLineLocStr(layer.Name + " : " + layer.GetValue(LayerPosition.FromWorldPosition(new Vector2i(200, 200), layer.Settings.VoxelsPerEntry)));
             //}
-            //MarsTerraforming.Terraform(new Vector2i(0, 0), new Vector2i(480, 480));
+            Vector2i marsLowerLeft = new Vector2i(0, 0);
+            Vector2i marsDimensions = new Vector2i(99, 99);
+            
+            MarsTerraforming.Terraform(marsLowerLeft, marsDimensions);
             //MarsTerraforming.CollapseAllOverhangs(new Vector2i(470, 420), new Vector2i(470, 420) + new Vector2i(150, 150));
         }
     }
@@ -54,13 +60,13 @@
         {
             if (argumentString.Length == 0)
             {
-                ChatManager.ServerMessageToPlayer(Localizer.DoStr("Specify coords"), user, category: MessageCategory.Info);
+                user.MsgLocStr("Specify coords");
                 return;
             }
             string[] parts = argumentString.Split(',', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length != 4 || parts.Any(s => !int.TryParse(s, out int n)))
             {
-                ChatManager.ServerMessageToPlayer(Localizer.DoStr("Specify integer coords in the format: lower left x,lower left z,width,height"), user, category: MessageCategory.Info);
+                user.MsgLocStr("Specify integer coords in the format: lower left x,lower left z,width,height", NotificationStyle.Info);
                 return;
             }
             int[] coords = parts.Select(s => int.Parse(s)).ToArray();
@@ -69,9 +75,11 @@
 
             Vector2i corner1 = new Vector2i(coords[0], coords[1]);
             Vector2i corner2 = new Vector2i(coords[0] + coords[2] - 1, coords[1] + coords[3] - 1);
+            corner2 = ClampCorner2(corner1, corner2);
+            Log.WriteErrorLineLocStr("Terraforming " + corner1 + "-" + corner2 + " (unclamped coords)");
             Terraform(corner1, corner2);
 
-            Log.WriteErrorLineLocStr("Finished rock switching");
+            Log.WriteErrorLineLocStr("Finished terraforming");
         }
         /// <summary>
         /// Collapse overhangs where the solid rock thickness is fewer than three blocks thick
@@ -83,21 +91,47 @@
         {
             if (argumentString.Length == 0)
             {
-                ChatManager.ServerMessageToPlayer(Localizer.DoStr("Specify coords"), user, category: MessageCategory.Info);
+                user.MsgLocStr("Specify coords", NotificationStyle.Info);
                 return;
             }
             string[] parts = argumentString.Split(',', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length != 4 || parts.Any(s => !int.TryParse(s, out int n)))
             {
-                ChatManager.ServerMessageToPlayer(Localizer.DoStr("Specify integer coords in the format: lower left x,lower left z,width,height"), user, category: MessageCategory.Info);
+                user.MsgLocStr("Specify integer coords in the format: lower left x,lower left z,width,height", NotificationStyle.Info);
                 return;
             }
             int[] coords = parts.Select(s => int.Parse(s)).ToArray();
             Vector2i corner1 = new Vector2i(coords[0], coords[1]);
             Vector2i corner2 = new Vector2i(coords[0] + coords[2] - 1, coords[1] + coords[3] - 1);
+            corner2 = ClampCorner2(corner1, corner2); 
             CollapseAllOverhangs(corner1, corner2);
 
             Log.WriteErrorLineLocStr("Finished collapsing");
+        }
+        /// <summary>
+        /// Collapse overhangs where the solid rock thickness is fewer than three blocks thick
+        /// </summary>
+        /// <param name="user">User sending the message</param>
+        /// <param name="message">Message to be repeated</param>
+        [ChatCommand("Collapse overhangs where the solid rock thickness is fewer than three blocks thick", ChatAuthorizationLevel.Admin)]
+        public static void KillPlants(User user, string argumentString = "")
+        {
+            if (argumentString.Length == 0)
+            {
+                user.MsgLocStr("Specify coords", NotificationStyle.Info);
+                return;
+            }
+            string[] parts = argumentString.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length != 4 || parts.Any(s => !int.TryParse(s, out int n)))
+            {
+                user.MsgLocStr("Specify integer coords in the format: lower left x,lower left z,width,height", NotificationStyle.Info);
+                return;
+            }
+            int[] coords = parts.Select(s => int.Parse(s)).ToArray();
+            Vector2i corner1 = new Vector2i(coords[0], coords[1]);
+            Vector2i corner2 = new Vector2i(coords[0] + coords[2] - 1, coords[1] + coords[3] - 1); KillAllPlants(corner1, corner2);
+            corner2 = ClampCorner2(corner1, corner2);
+            Log.WriteErrorLineLocStr("Finished killing plants");
         }
         /// <summary>
         /// Evaporate water above this depth
@@ -109,32 +143,47 @@
         {
             if (argumentString.Length == 0)
             {
-                ChatManager.ServerMessageToPlayer(Localizer.DoStr("Specify coords"), user, category: MessageCategory.Info);
+                user.MsgLocStr("Specify coords", NotificationStyle.Chat);
                 return;
             }
             string[] parts = argumentString.Split(',', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length != 5 || parts.Any(s => !int.TryParse(s, out int n)))
             {
-                ChatManager.ServerMessageToPlayer(Localizer.DoStr("Specify integer coords in the format: lower left x,lower left z,width,height,depth to keep"), user, category: MessageCategory.Info);
+                user.MsgLocStr("Specify integer coords in the format: lower left x,lower left z,width,height,depth to keep", NotificationStyle.Info);
                 return;
             }
             int[] coords = parts.Select(s => int.Parse(s)).ToArray();
             Vector2i corner1 = new Vector2i(coords[0], coords[1]);
             Vector2i corner2 = new Vector2i(coords[0] + coords[2] - 1, coords[1] + coords[3] - 1);
+            corner2 = ClampCorner2(corner1, corner2);
             int depth = coords[4];
             RemoveAllWaterAboveHeight(corner1, corner2, depth);
 
             Log.WriteErrorLineLocStr("Finished evaporating");
         }
+        public static Vector2i ClampCorner2(Vector2i corner1, Vector2i corner2)
+        {
+            //corner 1 = (2,2), corner2 = (9,9), world size=(4,4)
+            //corner2 = (5,5)
+            Vector2i clampedToWorldSize = new Vector2i(corner1.x + Math.Min(World.World.WrappedVoxelSize.x - 1, corner2.x - corner1.x), corner1.y + Math.Min(World.World.WrappedVoxelSize.z - 1, corner2.y - corner1.y));
+            return clampedToWorldSize;
+        }
         public static void Terraform(Vector2i corner1, Vector2i corner2)
         {
-            KillPlants(corner1, corner2);
+            Vector3 worldSize = World.World.WrappedVoxelSize;
+            corner2 = ClampCorner2(corner1, corner2);
+            WipeLayersForMars(corner1, corner2);
+            KillAllPlants(corner1, corner2);
             ReplaceRockWithMartianRock(corner1, corner2);
             RemoveAllWaterAboveHeight(corner1, corner2, 30);
             CollapseAllOverhangs(corner1, corner2);
+            List<MarsBounds> newMarsBounds = MarsMultiBounds.Mars.Bounds;
+            newMarsBounds.Add(new MarsBounds(corner1, corner2 - corner1));
+            MarsMultiBounds.Mars = new MarsMultiBounds(newMarsBounds);
         }
         private static void ReplaceRockWithMartianRock(Vector2i corner1, Vector2i corner2)
         {
+            corner2 = ClampCorner2(corner1, corner2);
             Dictionary<Vector3i, Block> topBlocks = GetTopGroundOrWaterBlocks(corner1, corner2);
             Dictionary<Vector3i, Block> inQueue = topBlocks;
             while (inQueue.Count() > 0)
@@ -147,6 +196,7 @@
         }
         public static void CollapseAllOverhangs(Vector2i corner1, Vector2i corner2)
         {
+            corner2 = ClampCorner2(corner1, corner2);
             for (int x = corner1.x; x <= corner2.x; x++)
             {
                 List<Vector3i> rowPositions = new List<Vector3i>();
@@ -186,21 +236,129 @@
                 while (changedStackCoords.Count() > 0);
             }
         }
-        public static void KillPlants(Vector2i corner1, Vector2i corner2)
+        public static void KillAllPlants(Vector2i corner1, Vector2i corner2)
         {
+            corner2 = ClampCorner2(corner1, corner2);
             Dictionary<Vector3i, Block> topBlocks = GetTopGroundBlocks(corner1, corner2);
             foreach(Vector3i groundPos in topBlocks.Keys)
             {
-                Vector3i plantPos = groundPos + Vector3i.Up;
+                Vector3i plantPos = groundPos;
                 Plant plant = PlantBlock.GetPlant(plantPos);
+                PlantBlock plantBlock = World.World.GetBlock(plantPos) as PlantBlock;
                 if (plant != null)
                 {
                     plant.Destroy();
                 }
+                if (plantBlock != null)
+                {
+                    plantBlock.Destroyed(plantPos, Block.Empty);
+                }
+                plantPos = groundPos + Vector3i.Up;
+                plant = PlantBlock.GetPlant(plantPos);
+                plantBlock = World.World.GetBlock(plantPos) as PlantBlock;
+                if (plant != null)
+                {
+                    plant.Destroy();
+                }
+                if (plantBlock != null)
+                {
+                    plantBlock.Destroyed(plantPos, Block.Empty);
+                }
             }
+        }
+        public static void WipeLayersForMars(Vector2i corner1, Vector2i corner2)
+        {
+            List<string> layerNames = new List<string>()
+            {
+                "Oilfield",
+                "Temperature",
+                "SaltWater",
+                "FreshWater",
+                "SoilMoisture",
+                "Rainfall",
+                "Invertebrates",
+                "Nitrogen",
+                "Phosphorus",
+                "Potassium",
+                "SaltWaterSpread",
+
+                "Agouti",
+                "Alligator",
+                "Bass",
+                "BighornSheep",
+                "Bison",
+                "BlueShark",
+                "Cod",
+                "Coyote",
+                "Crab",
+                "Deer",
+                "Elk",
+                "Fox",
+                "Hare",
+                "Jaguar",
+                "MoonJellyfish",
+                "MountainGoat",
+                "Otter",
+                "PacificSardine",
+                "PrairieDog",
+                "Salmon",
+                "SnappingTurtle",
+                "Tarantula",
+                "Tortoise",
+                "Trout",
+                "Tuna",
+                "Turkey",
+                "Wolf"
+
+            };
+            layerNames.AddRange(WorldLayerManager.Obj.Layers.Where(layer => layer.Name.EndsWith("Potential") || layer.Name.EndsWith("Biome") || layer.Name.EndsWith("Capacity") || layer.Name.EndsWith("Growth")).Select(layer => layer.Name));
+            WipeLayers(corner1, corner2, layerNames);
+        }
+        public static void WipeLayers(Vector2i corner1, Vector2i corner2, IEnumerable<string> layerNames, float newValue = 0f)
+        {
+            List<WorldLayer> validLayers = new List<WorldLayer>();
+            foreach (string layerName in layerNames)
+            {
+                WorldLayer layer = WorldLayerManager.Obj.GetLayer(layerName);
+                if (layer != null)
+                {
+                    for (int x = corner1.x; x <= corner2.x; x++)
+                    {
+                        for (int z = corner1.y; z <= corner2.y; z++)
+                        {
+                            Vector2i pos = World.World.GetWrappedWorldPosition(new Vector2i(x,  z));
+
+                            layer.SetAtWorldPos(pos, newValue);
+                        }
+                    }
+                    Log.WriteErrorLineLocStr("Set " + layerName + " layer");
+                    validLayers.Add(layer);
+                }
+                else
+                {
+                    Log.WriteErrorLineLocStr(layerName + " does not exist");
+                }
+            }
+            foreach (string layerName in layerNames)
+            {
+                try
+                {
+                    WorldLayer layer = WorldLayerManager.Obj.GetLayer(layerName);
+                    if (layer != null)
+                    {
+                        layer.DoTick();
+                    }
+                }
+                catch
+                {
+                    Log.WriteErrorLineLocStr("Something went wrong with layer: " + layerName);
+                }
+            }
+            Log.WriteErrorLineLocStr("Finished wiping layers");
         }
         private static void RemoveAllWaterAboveHeight(Vector2i corner1, Vector2i corner2, int height)
         {
+            corner2 = ClampCorner2(corner1, corner2);
             Dictionary<Vector3i, Block> layer = new Dictionary<Vector3i, Block>();
             for (int x = corner1.x; x <= corner2.x; x++)
             {
@@ -215,7 +373,7 @@
             {
                 foreach(Vector3i pos in layer.Keys)
                 {
-                    if (layer[pos].GetType() == typeof(WaterBlock))
+                    if (layer[pos].GetType() == typeof(WaterBlock) || layer[pos].GetType() == typeof(EncasedWaterBlock))
                     {
                         BlockChange blockChange = new BlockChange();
                         blockChange.Position = pos;
@@ -233,10 +391,6 @@
         {
             try
             {
-                foreach (BlockChange change in blockChanges)
-                {
-                    Log.WriteErrorLineLocStr(change.Position.ToStringBasic() + ":" + change.BlockType.Name);
-                }
                 World.World.BatchApply(blockChanges);
             }
             catch
@@ -368,7 +522,7 @@
                 {
                     Vector3i oldPos = lowestPos + Vector3i.Up * i;
                     Vector3i newPos = oldPos - Vector3i.Up * dropHeight;
-                    if (newPos.y <= 1)
+                    if (newPos.y <= 0)
                     {
                         Log.WriteErrorLineLocStr("too low " + lowestPos + " thickness=" + thickness + " drop height=" + dropHeight + " newPos=" + newPos);
                     }
@@ -408,7 +562,7 @@
                 for (int y = 0; y <= World.World.MaxYPos(basePos.XZ).y; y++)
                 {
                     Vector3i pos = basePos + Vector3i.Up * y;
-                    if (!IsCave(pos) && !IsSolidRock(pos))
+                    if (!IsSolidRock(pos))
                     {
                         return y;
                     }
@@ -452,7 +606,7 @@
             return World.World.MaxYPos(roofPos.XZ).y - roofPos.y + 1;
         }
         /// <summary>
-        /// Returns if this position is somewhere a cave can collapse into i.e. is air or water
+        /// Returns if this position is somewhere an unsupported column can collapse into i.e. is air or water
         /// </summary>
         /// <param name="pos"></param>
         /// <returns></returns>
@@ -461,7 +615,7 @@
             try
             {
                 Block block = World.World.GetBlock(pos);
-                return IsCaveType(block.GetType());
+                return (block != null && block.IsWater()) || IsCaveType(block.GetType());
             }
             catch
             {
@@ -538,6 +692,7 @@
                     { typeof(CoalBlock), typeof(EmptyBlock) },
                     { typeof(LogBlock), typeof(EmptyBlock) },
                     { typeof(TreeBlock), typeof(EmptyBlock) },
+                    { typeof(PlantBlock), typeof(EmptyBlock) }
                 };
                 if (currentType == typeof(CoalBlock))
                 {
@@ -574,13 +729,6 @@
                     else if (new System.Random().Chance(0.15f))
                     {
                         return typeof(CrushedIronOreBlock);
-                    }
-                }
-                else if (currentType == typeof(GneissBlock))
-                {
-                    if (new System.Random().Chance(0.4f))
-                    {
-                        return typeof(SandstoneBlock);
                     }
                 }
                 if (blockSwitches.ContainsKey(currentType))

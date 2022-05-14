@@ -1,4 +1,0 @@
-C:\Users\Alex\source\repos\Eco Mod Project\obj\Debug\netstandard2.1\Eco Mod Project.csprojAssemblyReference.cache
-C:\Users\Alex\source\repos\Eco Mod Project\obj\Debug\netstandard2.1\Eco Mod Project.AssemblyInfoInputs.cache
-C:\Users\Alex\source\repos\Eco Mod Project\obj\Debug\netstandard2.1\Eco Mod Project.AssemblyInfo.cs
-C:\Users\Alex\source\repos\Eco Mod Project\obj\Debug\netstandard2.1\Eco Mod Project.csproj.CoreCompileInputs.cache
