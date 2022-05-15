@@ -6,8 +6,8 @@ These are two mods I'm working on that will bring outer space just that bit clos
 Turn existing terrain into a martian landscape
   -Commands:
   /makemars x,y,w,h
-    x,y of lower left coord
-    width, height of land or sea to terraform
+    x,y of lower left coord. 
+    width, height of area to terraform. 
     admin only
 
 2. Oxygen
@@ -19,9 +19,9 @@ Each barrel fills up 5 minutes of oxygen time.
 You can also breath freely when in a T3+ room that contains a powered waste filter and has no holes
   -Commands:
   /ox
-    Tells the player how much oxygen is left in their tank
+    Tells the player how much oxygen is left in their tank. 
   /atm
-    Tells the player what the room still needs in order to provide free oxygen
+    Tells the player what the room still needs in order to provide free oxygen. 
 
 Known issues:
 1. Plants don't get destroyed when terraforming, including water plants
@@ -30,6 +30,6 @@ Known issues:
 4. There are thin columns of gneiss, which when turned to water can lead to deep narrow holes into the ground. Solution may be to make gneiss above a certain height or too close to the surface into sandstone, and only turn deep gneiss depsosits to water
 5. No way yet of linking waste filter rooms to other nearby pressurised rooms that don't have their own waste filters. Currently every room needs a waste filter in order to breath without using the oxygen tank
 6. Waste filters don't add any load to the power grid
-
+7. The damage effect doesn't work when the player is out of calories
 
 Put the .cs files from the master branch in /UserCode
