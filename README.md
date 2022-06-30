@@ -10,17 +10,11 @@ Drop the 'Eco In Space' folder into Mods/UserCode
 
 # 1. Mars Terraforming
 Turn existing terrain into a martian landscape.
-There are partially submerged cave systems near bedrock.
-If you don't want water in these caves you can remove it afterwards with the /evaporate above command.
-It will automatically add the requirement for oxygen to this area. Only virgin terrain should be terraformed; it is expected that servers would want to terraform before the start of a season. Note that the process may take a while to complete if the area is large. 
+It will automatically add the requirement for oxygen to this area. Only virgin terrain should be terraformed; it is expected that servers would want to terraform before the start of a season. Using on land with placed objects may result in unexpected behaviour. Note that the process may take a while to complete if the area is large. 
   -Admin Commands:
   /makemars x,y,w,h
     x,y of lower left coord.
     width, height of area to terraform.
-  /evaporateabove x,y,w,h,d
-    x,y of lower left coord.
-    width, height of area
-    depth - water below this depth from bedrock is safe, everything at or above turns to air
 
 # 2. Oxygen
 Simulate need for oxygen when on Mars through personal oxygen tanks for each player, and by connecting waste filters to rooms.
