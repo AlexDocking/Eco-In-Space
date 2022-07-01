@@ -18,6 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Moq" Version="4.18.1" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Eco.Core">
       <HintPath>D:\Files\Downloads\EcoModKit_v0.9.5.3-beta\ReferenceAssemblies\Eco.Core.dll</HintPath>
     </Reference>
