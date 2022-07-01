@@ -9,9 +9,10 @@
 
     public static class HelperExtensionMethods
     {
+        private static WorldObjectManager worldObjectManager = ASingleton<WorldObjectManager>.Obj;
         public static IEnumerable<T> FindWorldObjects<T>() where T : WorldObject
         {
-            return new WorldObjectManager().All.Where(worldObject => worldObject is T).Cast<T>();
+            return worldObjectManager.All.Where(worldObject => worldObject is T).Cast<T>();
         }
         public static Tuple<Vector3i, Vector3i> ForwardBack(this Axis axis)
         {

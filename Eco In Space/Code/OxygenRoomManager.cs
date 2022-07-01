@@ -107,8 +107,7 @@
         }
         public static IEnumerable<WasteFilterObject> FindRelevantWasteFilters()
         {
-            WorldObjectManager worldObjectManager = new WorldObjectManager();
-            IEnumerable<WasteFilterObject> allWasteFilters = worldObjectManager.All.OfType<WasteFilterObject>();
+            IEnumerable<WasteFilterObject> allWasteFilters = HelperExtensionMethods.FindWorldObjects<WasteFilterObject>();
             IEnumerable<WasteFilterObject> wasteFiltersOnMars = allWasteFilters.Where(filter => OxygenRoomsZone.InBounds(filter.Position3i));
             return wasteFiltersOnMars;
         }
