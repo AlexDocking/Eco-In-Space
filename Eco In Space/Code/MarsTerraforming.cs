@@ -127,7 +127,7 @@
         /// <summary>
         /// Build up to this level
         /// </summary>
-        private const int SPACE_START_HEIGHT = 320;
+        private int SpaceHeight { get => World.VoxelSize.y; }
 
         public BoundaryWallBuilder()
         {
@@ -142,10 +142,15 @@
             List<BlockChange> blockChanges = new List<BlockChange>();
             int northLength = corner2.y - corner1.y + 1;
             int eastLength = corner2.x - corner1.x + 1;
-            blockChanges.AddRange(BuildWallNorth(corner1, northLength));
-            blockChanges.AddRange(BuildWallNorth(corner1 + Vector2i.Right * eastLength, northLength));
-            blockChanges.AddRange(BuildWallEast(corner1 + Vector2i.Right, eastLength));
-            blockChanges.AddRange(BuildWallEast(corner1 + Vector2i.Right + Vector2i.Up * northLength, eastLength));
+
+            Vector2i bottomLeft = corner1;
+            Vector2i bottomRight = bottomLeft + Vector2i.Right * eastLength;
+            Vector2i topLeft = bottomLeft + Vector2i.Up * northLength;
+
+            blockChanges.AddRange(BuildWallNorth(bottomLeft, northLength));
+            blockChanges.AddRange(BuildWallNorth(bottomRight, northLength));
+            blockChanges.AddRange(BuildWallEast(bottomLeft, eastLength));
+            blockChanges.AddRange(BuildWallEast(topLeft, eastLength));
             return blockChanges;
         }
         private IEnumerable<BlockChange> BuildWallEast(Vector2i westPoint, int length)
@@ -154,12 +159,12 @@
             for (int i = 0; i < length; i++)
             {
                 Vector2i xy = World.GetWrappedWorldPosition(westPoint + Vector2i.Right * i);
-                for (int h = 1; h <= SPACE_START_HEIGHT; h++)
+                for (int h = 1; h < SpaceHeight; h++)
                 {
                     Vector3i wallPoint = new Vector3i(xy.x, h, xy.y);
                     BlockChange blockChange = new BlockChange();
                     blockChange.Position = wallPoint;
-                    blockChange.BlockType = typeof(AshlarShaleCubeBlock);
+                    blockChange.BlockType = WallType;
                     blockChanges.Add(blockChange);
                 }
             }
@@ -171,12 +176,12 @@
             for (int i = 0; i < length; i++)
             {
                 Vector2i xy = World.GetWrappedWorldPosition(southPoint + Vector2i.Up * i);
-                for (int h = 1; h <= SPACE_START_HEIGHT; h++)
+                for (int h = 1; h < SpaceHeight; h++)
                 {
                     Vector3i wallPoint = new Vector3i(xy.x, h, xy.y);
                     BlockChange blockChange = new BlockChange();
                     blockChange.Position = wallPoint;
-                    blockChange.BlockType = typeof(AshlarShaleBlock);
+                    blockChange.BlockType = WallType;
                     blockChanges.Add(blockChange);
                 }
             }
@@ -748,7 +753,7 @@
         }
         public void BuildWalls()
         {
-            AddToBuffer((new BoundaryWallBuilder()).BuildAllWalls(Corner1, Corner2));
+            AddToBuffer((new BoundaryWallBuilder(typeof(AshlarShaleCubeBlock))).BuildAllWalls(Corner1, Corner2));
         }
         public void CollapseOverhangs()
         {
