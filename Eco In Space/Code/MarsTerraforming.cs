@@ -476,18 +476,17 @@
         public override Type GetNewBlockType(Type currentType, Vector3i position)
         {
             Dictionary<Type, Type> blockSwitches = new Dictionary<Type, Type>()
-                {
-                    { typeof(SandstoneBlock), typeof(CrushedSandstoneBlock) },
-                    { typeof(BasaltBlock), typeof(CrushedBasaltBlock) },
-                    { typeof(LimestoneBlock), typeof(CrushedLimestoneBlock) },
-                    { typeof(GneissBlock), typeof(CrushedGneissBlock) },
-                    { typeof(GraniteBlock), typeof(CrushedGraniteBlock) },
-                    { typeof(ShaleBlock), typeof(CrushedShaleBlock) },
-                    { typeof(IronOreBlock), typeof(CrushedIronOreBlock) },
-                    { typeof(GoldOreBlock), typeof(CrushedGoldOreBlock) },
-                    { typeof(CopperOreBlock), typeof(CrushedCopperOreBlock) },
-                    { typeof(EncasedWaterBlock), typeof(EmptyBlock) }
-                };
+            {
+                { typeof(SandstoneBlock), typeof(CrushedSandstoneBlock) },
+                { typeof(BasaltBlock), typeof(CrushedBasaltBlock) },
+                { typeof(LimestoneBlock), typeof(CrushedLimestoneBlock) },
+                { typeof(GneissBlock), typeof(CrushedGneissBlock) },
+                { typeof(GraniteBlock), typeof(CrushedGraniteBlock) },
+                { typeof(ShaleBlock), typeof(CrushedShaleBlock) },
+                { typeof(IronOreBlock), typeof(CrushedIronOreBlock) },
+                { typeof(GoldOreBlock), typeof(CrushedGoldOreBlock) },
+                { typeof(CopperOreBlock), typeof(CrushedCopperOreBlock) },
+            };
             if (blockSwitches.ContainsKey(currentType))
             {
                 return blockSwitches[currentType];
@@ -806,20 +805,11 @@
                 }
             }
             AddToBuffer(blockChanges);
-            Log.WriteErrorLineLocStr("performing " + blockChanges.Count + " replacements");
         }
         public void EvaporateAbove(int depth)
         {
-            Log.WriteErrorLineLocStr("Evaporate");
-            List<Vector3i> layer = new List<Vector3i>();
-            for (int x = Corner1.x; x <= corner2.x; x++)
-            {
-                for (int z = Corner1.y; z <= corner2.y; z++)
-                {
-                    Vector3i basePos = World.GetWrappedWorldPosition(new Vector3i(x, depth, z));
-                    layer.Add(basePos);
-                }
-            }
+            //Sometimes it starts evaporating a block below where it should
+            List<Vector3i> layer = WorldAccessor.GetLayer(Corner1, Corner2, depth + 1).Keys.ToList();
             List<BlockChange> blockChanges = new List<BlockChange>();
             while (layer.Count() > 0)
             {
