@@ -45,7 +45,7 @@
             CreateConfigFile();
             try
             {
-                data = Eco.EM.Framework.FileManager.FileManager<T>.ReadTypeHandledFromFile(RelativeFolderLocation, FileName);
+                data = Eco.EM.Framework.FileManager.FileManager<T>.ReadTypeHandledFromFile(RelativeFolderLocation, FileName, FileExtension);
                 return true;
             }
             catch
