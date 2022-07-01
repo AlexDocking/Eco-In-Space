@@ -114,7 +114,7 @@
         }
         public LazyResult ShouldOverrideAuth(GameAction action)
         {
-            return LazyResult.Succeeded;
+            return LazyResult.FailedNoMessage;
         }
         private static bool IsTargetingOxygenRefillStation(GameAction baseAction, out WasteFilterObject oxygenTank)
         {
